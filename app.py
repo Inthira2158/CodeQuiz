@@ -15,6 +15,16 @@ import database as db
 app = Flask(__name__)
 app.config.from_object(Config)
 
+# Auto-seed database if it doesn't exist (crucial for zero-config cloud deployments)
+if not os.path.exists(Config.DATABASE):
+    try:
+        from seed_data import seed_database
+        print("Database not found on startup. Auto-seeding initial database...")
+        seed_database()
+        print("Auto-seeding complete.")
+    except Exception as _e:
+        print(f"Auto-seed exception: {_e}")
+
 # Register teardown function for database
 app.teardown_appcontext(db.close_db)
 

@@ -1,11 +1,10 @@
 services:
   - type: web
     name: codequiz-platform
-    runtime: python
+    env: python
+    plan: free
     buildCommand: pip install -r requirements.txt && python seed_data.py
     startCommand: gunicorn app:app
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.0
       - key: SECRET_KEY
         generateValue: true
