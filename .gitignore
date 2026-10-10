@@ -38,7 +38,9 @@ env/
 *.db
 
 # IDE settings
-.vscode/
+.vscode/*
+!.vscode/launch.json
+!.vscode/settings.json
 .idea/
 *.swp
 *.swo
