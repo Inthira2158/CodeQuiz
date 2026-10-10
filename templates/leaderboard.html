@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}Leaderboard & Rankings – CodeQuiz{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="text-center mb-4">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-warning-subtle text-warning border border-warning-subtle small fw-bold mb-2">
+            <i class="fa-solid fa-trophy"></i> Global & Topic Standings
+        </div>
+        <h2 class="fw-black text-light mb-1">Developer Leaderboard & Rankings</h2>
+        <p class="text-secondary small">Compare scores, accuracy, and quiz milestones against programmers worldwide.</p>
+    </div>
+
+    <!-- Topic Tabs Navigation -->
+    <div class="d-flex flex-wrap gap-2 justify-content-center mb-4">
+        <a href="{{ url_for('leaderboard', topic='all') }}" class="btn rounded-pill px-3 py-2 small fw-semibold {% if selected_topic == 'all' %}btn-warning text-dark{% else %}btn-outline-secondary text-light{% endif %}">
+            <i class="fa-solid fa-globe me-1"></i> All Topics
+        </a>
+        {% for top in topics %}
+        <a href="{{ url_for('leaderboard', topic=top.slug) }}" class="btn rounded-pill px-3 py-2 small fw-semibold {% if selected_topic == top.slug %}btn-primary text-white{% else %}btn-outline-secondary text-light{% endif %}">
+            <i class="{{ top.icon }} me-1" style="color: {{ top.color }};"></i> {{ top.name }}
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Podium Section (Top 3) if rankings exist -->
+    {% if rankings and rankings|length >= 3 %}
+    <div class="row g-3 justify-content-center align-items-end mb-5">
+        <!-- 2nd Place -->
+        <div class="col-md-3 order-2 order-md-1">
+            <div class="podium-card podium-2nd">
+                <span class="badge bg-secondary text-white font-monospace fw-bold mb-2">🥈 2nd Place</span>
+                <div class="avatar-circle avatar-medium bg-secondary text-white mx-auto mb-2">
+                    {{ rankings[1].username[:1].upper() }}
+                </div>
+                <h5 class="fw-bold text-light mb-1 text-truncate">{{ rankings[1].username }}</h5>
+                <div class="text-muted small font-monospace mb-2">
+                    {% if selected_topic == 'all' %}
+                        {{ rankings[1].quizzes_completed }} quizzes • {{ rankings[1].avg_accuracy }}%
+                    {% else %}
+                        {{ rankings[1].quizzes_taken }} quizzes • {{ rankings[1].best_score }}% best
+                    {% endif %}
+                </div>
+                <div class="fw-bold text-warning font-monospace fs-5">
+                    <i class="fa-solid fa-star me-1"></i>
+                    {% if selected_topic == 'all' %}{{ rankings[1].total_points }}{% else %}{{ rankings[1].topic_points or 0 }}{% endif %} pts
+                </div>
+            </div>
+        </div>
+
+        <!-- 1st Place (Center, Elevated) -->
+        <div class="col-md-4 order-1 order-md-2">
+            <div class="podium-card podium-1st py-4">
+                <div class="text-warning fs-3 mb-1"><i class="fa-solid fa-crown"></i></div>
+                <span class="badge bg-warning text-dark font-monospace fw-bold mb-2">🥇 1st Champion</span>
+                <div class="avatar-circle avatar-large bg-warning text-dark mx-auto mb-2 shadow">
+                    {{ rankings[0].username[:1].upper() }}
+                </div>
+                <h4 class="fw-black text-light mb-1 text-truncate">{{ rankings[0].username }}</h4>
+                <div class="text-muted small font-monospace mb-2">
+                    {% if selected_topic == 'all' %}
+                        {{ rankings[0].quizzes_completed }} quizzes • {{ rankings[0].avg_accuracy }}%
+                    {% else %}
+                        {{ rankings[0].quizzes_taken }} quizzes • {{ rankings[0].best_score }}% best
+                    {% endif %}
+                </div>
+                <div class="fw-black text-warning font-monospace fs-4">
+                    <i class="fa-solid fa-star me-1"></i>
+                    {% if selected_topic == 'all' %}{{ rankings[0].total_points }}{% else %}{{ rankings[0].topic_points or 0 }}{% endif %} pts
+                </div>
+            </div>
+        </div>
+
+        <!-- 3rd Place -->
+        <div class="col-md-3 order-3 order-md-3">
+            <div class="podium-card podium-3rd">
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle font-monospace fw-bold mb-2">🥉 3rd Place</span>
+                <div class="avatar-circle avatar-medium bg-danger-subtle text-danger mx-auto mb-2">
+                    {{ rankings[2].username[:1].upper() }}
+                </div>
+                <h5 class="fw-bold text-light mb-1 text-truncate">{{ rankings[2].username }}</h5>
+                <div class="text-muted small font-monospace mb-2">
+                    {% if selected_topic == 'all' %}
+                        {{ rankings[2].quizzes_completed }} quizzes • {{ rankings[2].avg_accuracy }}%
+                    {% else %}
+                        {{ rankings[2].quizzes_taken }} quizzes • {{ rankings[2].best_score }}% best
+                    {% endif %}
+                </div>
+                <div class="fw-bold text-warning font-monospace fs-5">
+                    <i class="fa-solid fa-star me-1"></i>
+                    {% if selected_topic == 'all' %}{{ rankings[2].total_points }}{% else %}{{ rankings[2].topic_points or 0 }}{% endif %} pts
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Full Leaderboard Table -->
+    <div class="quiz-card p-0 overflow-hidden shadow-sm">
+        <div class="p-3 border-bottom border-secondary-subtle d-flex align-items-center justify-content-between">
+            <span class="fw-bold text-light">
+                <i class="fa-solid fa-list-ol text-primary me-2"></i>{{ current_topic_name }} Rankings Table
+            </span>
+            {% if my_rank %}
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace px-3 py-1">
+                Your Global Rank: #{{ my_rank }}
+            </span>
+            {% endif %}
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0">
+                <thead class="border-bottom border-secondary-subtle">
+                    <tr class="text-muted small font-monospace">
+                        <th class="ps-4" style="width: 80px;">RANK</th>
+                        <th>DEVELOPER</th>
+                        <th>QUIZZES TAKEN</th>
+                        <th>
+                            {% if selected_topic == 'all' %}AVG ACCURACY{% else %}BEST SCORE{% endif %}
+                        </th>
+                        {% if selected_topic != 'all' %}
+                        <th>MASTERY LEVEL</th>
+                        {% endif %}
+                        <th class="text-end pe-4">POINTS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rankings %}
+                    <tr {% if current_user and row.id == current_user.id %}class="table-primary border-primary"{% endif %}>
+                        <td class="ps-4">
+                            {% if loop.index == 1 %}
+                                <span class="badge bg-warning text-dark font-monospace fw-bold"><i class="fa-solid fa-crown me-1"></i>#1</span>
+                            {% elif loop.index == 2 %}
+                                <span class="badge bg-secondary text-white font-monospace fw-bold">#2</span>
+                            {% elif loop.index == 3 %}
+                                <span class="badge bg-danger-subtle text-danger font-monospace fw-bold">#3</span>
+                            {% else %}
+                                <span class="text-muted font-monospace fw-semibold">#{{ loop.index }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="avatar-circle avatar-small bg-primary text-white">
+                                    {{ row.username[:1].upper() }}
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-light">
+                                        {{ row.username }}
+                                        {% if current_user and row.id == current_user.id %}
+                                            <span class="badge bg-primary ms-1 small">You</span>
+                                        {% endif %}
+                                    </div>
+                                    {% if row.bio %}
+                                    <div class="text-muted small text-truncate" style="max-width: 280px;">{{ row.bio }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="font-monospace text-light">
+                                {% if selected_topic == 'all' %}
+                                    {{ row.quizzes_completed }}
+                                {% else %}
+                                    {{ row.quizzes_taken }}
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle font-monospace">
+                                {% if selected_topic == 'all' %}
+                                    {{ row.avg_accuracy }}%
+                                {% else %}
+                                    {{ row.best_score }}%
+                                {% endif %}
+                            </span>
+                        </td>
+                        {% if selected_topic != 'all' %}
+                        <td>
+                            <span class="badge bg-info-subtle text-info border border-info-subtle font-monospace">
+                                {{ row.mastery_level or 'Novice' }}
+                            </span>
+                        </td>
+                        {% endif %}
+                        <td class="text-end pe-4">
+                            <span class="fw-bold text-warning font-monospace fs-6">
+                                <i class="fa-solid fa-star me-1"></i>
+                                {% if selected_topic == 'all' %}
+                                    {{ row.total_points }}
+                                {% else %}
+                                    {{ row.topic_points or 0 }}
+                                {% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-secondary">
+                            <i class="fa-solid fa-inbox fs-1 d-block mb-2"></i>
+                            No quiz attempts recorded yet for this topic. Be the first to play and top the leaderboard!
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

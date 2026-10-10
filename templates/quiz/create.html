@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Create Topic-Based Quiz Question – CodeQuiz{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="quiz-card p-4 p-md-5 shadow-lg border-secondary-subtle">
+                <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom border-secondary-subtle">
+                    <div>
+                        <h3 class="fw-bold text-light mb-1">
+                            <i class="fa-solid fa-circle-plus text-primary me-2"></i>Contribute a Quiz Question
+                        </h3>
+                        <p class="text-secondary small mb-0">Expand the programming question bank across any supported topic.</p>
+                    </div>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace px-3 py-1">
+                        Community Author
+                    </span>
+                </div>
+
+                <form action="{{ url_for('create_question') }}" method="POST">
+                    <div class="row g-3 mb-3">
+                        <!-- Topic Selection -->
+                        <div class="col-md-6">
+                            <label class="form-label text-light small fw-semibold">Target Topic / Language *</label>
+                            <select name="topic_slug" class="form-select bg-dark border-secondary-subtle text-light" required>
+                                <option value="" disabled selected>-- Select a Topic --</option>
+                                {% for top in topics %}
+                                <option value="{{ top.slug }}">{{ top.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Difficulty -->
+                        <div class="col-md-3">
+                            <label class="form-label text-light small fw-semibold">Difficulty Level *</label>
+                            <select name="difficulty" class="form-select bg-dark border-secondary-subtle text-light" required>
+                                <option value="Beginner">Beginner</option>
+                                <option value="Intermediate" selected>Intermediate</option>
+                                <option value="Advanced">Advanced</option>
+                            </select>
+                        </div>
+
+                        <!-- Time Limit -->
+                        <div class="col-md-3">
+                            <label class="form-label text-light small fw-semibold">Timer Limit (Seconds) *</label>
+                            <input type="number" name="time_limit_sec" class="form-control bg-dark border-secondary-subtle text-light" value="30" min="10" max="120" required>
+                        </div>
+                    </div>
+
+                    <!-- Question Text -->
+                    <div class="mb-3">
+                        <label class="form-label text-light small fw-semibold">Question Prompt *</label>
+                        <textarea name="question_text" class="form-control bg-dark border-secondary-subtle text-light" rows="2" placeholder="e.g. What will be printed by the following code snippet?" required></textarea>
+                    </div>
+
+                    <!-- Optional Code Snippet -->
+                    <div class="mb-3">
+                        <label class="form-label text-light small fw-semibold d-flex align-items-center justify-content-between">
+                            <span>Code Snippet (Optional)</span>
+                            <span class="text-muted small font-monospace">Formatted with Prism.js</span>
+                        </label>
+                        <textarea name="code_snippet" class="form-control bg-dark border-secondary-subtle text-light font-monospace" rows="4" placeholder="// Enter code snippet here..."></textarea>
+                    </div>
+
+                    <!-- Options A, B, C, D -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-light small fw-semibold">Option A *</label>
+                            <input type="text" name="option_a" class="form-control bg-dark border-secondary-subtle text-light" placeholder="Option text" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-light small fw-semibold">Option B *</label>
+                            <input type="text" name="option_b" class="form-control bg-dark border-secondary-subtle text-light" placeholder="Option text" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-light small fw-semibold">Option C *</label>
+                            <input type="text" name="option_c" class="form-control bg-dark border-secondary-subtle text-light" placeholder="Option text" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-light small fw-semibold">Option D *</label>
+                            <input type="text" name="option_d" class="form-control bg-dark border-secondary-subtle text-light" placeholder="Option text" required>
+                        </div>
+                    </div>
+
+                    <!-- Correct Answer Selection -->
+                    <div class="mb-3">
+                        <label class="form-label text-light small fw-semibold">Correct Option *</label>
+                        <div class="d-flex gap-3">
+                            {% for opt in ['A', 'B', 'C', 'D'] %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="correct_option" id="opt-{{ opt }}" value="{{ opt }}" {% if opt == 'A' %}checked{% endif %} required>
+                                <label class="form-check-label text-light fw-bold font-monospace" for="opt-{{ opt }}">
+                                    Option {{ opt }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Technical Explanation -->
+                    <div class="mb-4">
+                        <label class="form-label text-light small fw-semibold">Detailed Technical Explanation *</label>
+                        <textarea name="explanation" class="form-control bg-dark border-secondary-subtle text-light" rows="3" placeholder="Explain why the correct option is right and what concepts are involved..." required></textarea>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between pt-2 border-top border-secondary-subtle">
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary rounded-pill px-4">Cancel</a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-5 fw-bold shadow">
+                            Save Question to Bank <i class="fa-solid fa-check ms-1"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

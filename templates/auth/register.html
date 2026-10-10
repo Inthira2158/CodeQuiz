@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up – CodeQuiz{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="quiz-card p-4 p-md-5 shadow-lg border-secondary-subtle">
+                <div class="text-center mb-4">
+                    <div class="brand-icon-wrapper mx-auto mb-3" style="width: 50px; height: 50px; font-size: 1.5rem;">
+                        <i class="fa-solid fa-code text-primary"></i>
+                    </div>
+                    <h3 class="fw-bold text-light mb-1">Create Developer Account</h3>
+                    <p class="text-secondary small">Join programmers challenging themselves across 6 core tech stacks</p>
+                </div>
+
+                <form method="POST" action="{{ url_for('register') }}">
+                    <div class="mb-3">
+                        <label class="form-label text-light small fw-semibold">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary-subtle text-secondary"><i class="fa-solid fa-at"></i></span>
+                            <input type="text" name="username" class="form-control bg-dark border-secondary-subtle text-light" placeholder="e.g. PythonMaster" required autofocus>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-light small fw-semibold">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary-subtle text-secondary"><i class="fa-solid fa-envelope"></i></span>
+                            <input type="email" name="email" class="form-control bg-dark border-secondary-subtle text-light" placeholder="you@domain.com" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-light small fw-semibold">Password</label>
+                            <input type="password" name="password" class="form-control bg-dark border-secondary-subtle text-light" placeholder="At least 6 chars" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-light small fw-semibold">Confirm Password</label>
+                            <input type="password" name="confirm_password" class="form-control bg-dark border-secondary-subtle text-light" placeholder="Repeat password" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-light small fw-semibold">Short Bio / Specialty (Optional)</label>
+                        <input type="text" name="bio" class="form-control bg-dark border-secondary-subtle text-light" placeholder="e.g. Python & SQL backend learner">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold rounded-pill mb-3 shadow-sm">
+                        Create Account & Start Quizzing <i class="fa-solid fa-rocket ms-1"></i>
+                    </button>
+                </form>
+
+                <div class="text-center mt-3 pt-3 border-top border-secondary-subtle">
+                    <p class="small text-secondary mb-0">
+                        Already have an account? 
+                        <a href="{{ url_for('login') }}" class="text-primary fw-bold text-decoration-none">Log In</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

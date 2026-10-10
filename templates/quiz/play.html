@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Quiz: {{ topic.name }} – CodeQuiz{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+    <!-- Top Quiz Status Bar -->
+    <div class="quiz-header-bar mb-3 shadow-sm d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <!-- Topic & Question Info -->
+        <div class="d-flex align-items-center gap-3">
+            <div class="avatar-circle avatar-small" style="background: {{ topic.gradient }};">
+                <i class="{{ topic.icon }} text-white"></i>
+            </div>
+            <div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="fw-bold text-light">{{ topic.name }}</span>
+                    <span id="q-difficulty" class="badge font-monospace bg-info-subtle text-info border border-info-subtle">Mixed</span>
+                </div>
+                <div id="q-counter" class="text-secondary small font-monospace">Question 1 of {{ question_count }}</div>
+            </div>
+        </div>
+
+        <!-- Timer & Audio Controls -->
+        <div class="d-flex align-items-center gap-2">
+            <div id="timer-badge" class="timer-container shadow-sm">
+                <i class="fa-solid fa-stopwatch text-info"></i>
+                <span id="timer-display">00:30</span>
+            </div>
+
+            <button type="button" id="mute-btn" class="btn btn-dark border-secondary-subtle rounded-circle p-2" title="Toggle Sound Feedback" style="width: 40px; height: 40px;">
+                <i class="fa-solid fa-volume-high text-info"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Linear Progress Bar -->
+    <div class="progress mb-4 bg-dark border border-secondary-subtle" style="height: 6px; border-radius: 4px;">
+        <div id="quiz-progress-bar" class="progress-bar bg-primary" role="progressbar" style="width: 10%; transition: width 0.3s ease;"></div>
+    </div>
+
+    <!-- Main Quiz Row -->
+    <div class="row g-4">
+        <!-- Question Column -->
+        <div class="col-lg-9">
+            <div class="question-content-box position-relative">
+                <!-- Question Title -->
+                <h4 id="q-text" class="text-light fw-bold mb-3" style="line-height: 1.45;">
+                    Loading question...
+                </h4>
+
+                <!-- Syntax Highlighted Code Snippet Box -->
+                <div id="code-snippet-wrapper" class="code-container" style="display: none;">
+                    <pre><code id="code-element" class="language-{{ topic.code_lang }}"></code></pre>
+                </div>
+
+                <!-- Multiple Choice Options -->
+                <div id="options-container" class="mt-4">
+                    <!-- Rendered by quiz.js -->
+                </div>
+
+                <!-- Navigation Controls -->
+                <div class="d-flex align-items-center justify-content-between mt-4 pt-3 border-top border-secondary-subtle">
+                    <button type="button" id="prev-btn" class="btn btn-outline-secondary rounded-pill px-3" disabled>
+                        <i class="fa-solid fa-arrow-left me-1"></i> Previous
+                    </button>
+
+                    <button type="button" id="flag-btn" class="btn btn-outline-warning rounded-pill px-3">
+                        <i class="fa-regular fa-flag me-1"></i> Flag
+                    </button>
+
+                    <button type="button" id="next-btn" class="btn btn-primary rounded-pill px-4 fw-semibold">
+                        Next <i class="fa-solid fa-arrow-right ms-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Side Question Navigation Drawer -->
+        <div class="col-lg-3">
+            <div class="quiz-card p-3 shadow-sm">
+                <div class="d-flex align-items-center justify-content-between mb-3 border-bottom border-secondary-subtle pb-2">
+                    <span class="fw-bold text-light small"><i class="fa-solid fa-list-ol text-primary me-1"></i> Questions Map</span>
+                    <span class="badge bg-secondary-subtle text-secondary small font-monospace">{{ question_count }} Total</span>
+                </div>
+
+                <!-- Grid of Question Pills -->
+                <div id="nav-drawer" class="d-flex flex-wrap gap-2 justify-content-start mb-3">
+                    <!-- Pills 1..N dynamically generated -->
+                </div>
+
+                <!-- Legend -->
+                <div class="border-top border-secondary-subtle pt-3 small text-secondary">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="q-pill active" style="width: 18px; height: 18px; font-size: 0.6rem;"></span>
+                        <span style="font-size: 0.75rem;">Current Question</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="q-pill answered" style="width: 18px; height: 18px; font-size: 0.6rem;"></span>
+                        <span style="font-size: 0.75rem;">Answered</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="q-pill flagged" style="width: 18px; height: 18px; font-size: 0.6rem;"></span>
+                        <span style="font-size: 0.75rem;">Flagged for Review</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="q-pill" style="width: 18px; height: 18px; font-size: 0.6rem;"></span>
+                        <span style="font-size: 0.75rem;">Unanswered</span>
+                    </div>
+                </div>
+
+                <!-- Submit Early Button -->
+                <div class="mt-4 pt-2 border-top border-secondary-subtle">
+                    <button type="button" class="btn btn-outline-success w-100 rounded-pill btn-sm fw-semibold" onclick="window.quizEngineInstance.confirmSubmit()">
+                        <i class="fa-solid fa-paper-plane me-1"></i> Submit Quiz Early
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Submit Confirmation Modal -->
+<div class="modal fade" id="submitConfirmModal" tabindex="-1" aria-labelledby="submitConfirmLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-card border-secondary-subtle">
+            <div class="modal-header border-secondary-subtle">
+                <h5 class="modal-title text-light fw-bold" id="submitConfirmLabel">
+                    <i class="fa-solid fa-circle-question text-primary me-2"></i>Submit Your Quiz?
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-4">
+                <div id="submit-modal-summary" class="mb-3">
+                    Are you ready to submit your answers?
+                </div>
+                <div class="alert alert-dark border-secondary-subtle small mb-0">
+                    Your answers will be automatically scored, your topic mastery updated, and detailed explanations presented.
+                </div>
+            </div>
+            <div class="modal-footer border-secondary-subtle">
+                <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Keep Reviewing</button>
+                <button type="button" id="submit-modal-btn" class="btn btn-success rounded-pill px-4 fw-bold">
+                    Confirm & Submit <i class="fa-solid fa-check ms-1"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden submission form for POST submit -->
+<form id="quiz-submission-form" action="{{ url_for('quiz_submit') }}" method="POST" style="display: none;">
+    <input type="hidden" name="quiz_submission_payload" id="quiz-payload-input">
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/quiz.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const questions = {{ questions_json | safe }};
+        const topicSlug = "{{ topic.slug }}";
+        const difficulty = "{{ difficulty }}";
+        const timerMode = "{{ timer_mode }}";
+        const totalTimeLimit = {{ total_time_limit }};
+        const submitUrl = "{{ url_for('quiz_submit') }}";
+
+        window.quizEngineInstance = new QuizEngine({
+            questions: questions,
+            topicSlug: topicSlug,
+            difficulty: difficulty,
+            timerMode: timerMode,
+            totalTimeLimit: totalTimeLimit,
+            submitUrl: submitUrl
+        });
+    });
+</script>
+{% endblock %}

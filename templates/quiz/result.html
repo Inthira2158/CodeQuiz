@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block title %}Quiz Results: {{ attempt.topic_name }} – CodeQuiz{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Achievement Banner If Unlocked -->
+    {% if new_achievements %}
+    <div class="alert alert-warning border-0 shadow-lg d-flex align-items-center gap-3 p-3 mb-4 rounded-4" style="background: linear-gradient(90deg, #ff9800 0%, #ffd54f 100%); color: #161b22;">
+        <i class="fa-solid fa-trophy fs-2"></i>
+        <div>
+            <div class="fw-black fs-5">Achievement Unlocked!</div>
+            <div class="small fw-semibold">You unlocked: <strong>{{ new_achievements | join(', ') }}</strong></div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Top Score Header Card -->
+    <div class="quiz-card p-4 p-md-5 mb-4 text-center position-relative overflow-hidden shadow-lg border-0" style="background: radial-gradient(circle at 50% 20%, #1f2735 0%, #161b22 100%);">
+        <!-- Floating topic badge -->
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-dark-subtle border border-secondary-subtle mb-3">
+            <i class="{{ attempt.topic_icon }}" style="color: {{ attempt.topic_color }};"></i>
+            <span class="fw-semibold text-light">{{ attempt.topic_name }} Quiz</span>
+            <span class="text-secondary">•</span>
+            <span class="text-muted small font-monospace">{{ attempt.difficulty }}</span>
+        </div>
+
+        <!-- Score Gauge -->
+        <div class="score-circle-container my-3" style="border-color: {% if attempt.score_percentage >= 80 %}#3fb950{% elif attempt.score_percentage >= 50 %}#f1e05a{% else %}#f85149{% endif %};">
+            <div class="score-circle-number" style="color: {% if attempt.score_percentage >= 80 %}#3fb950{% elif attempt.score_percentage >= 50 %}#f1e05a{% else %}#f85149{% endif %};">
+                {{ attempt.score_percentage|int }}%
+            </div>
+            <div class="score-circle-label">Accuracy</div>
+        </div>
+
+        <!-- Performance Headline -->
+        <h2 class="fw-bold text-light mb-2">
+            {% if attempt.score_percentage >= 90 %}
+                🏆 Outstanding! True Coding Master!
+            {% elif attempt.score_percentage >= 70 %}
+                🎉 Great Job! Solid Programming Knowledge!
+            {% elif attempt.score_percentage >= 50 %}
+                👍 Good Effort! Getting Closer to Mastery!
+            {% else %}
+                💪 Keep Practicing! Review the explanations below.
+            {% endif %}
+        </h2>
+        <p class="text-secondary mx-auto" style="max-width: 600px;">
+            You completed the {{ attempt.topic_name }} assessment in {{ attempt.time_taken_sec }} seconds and earned 
+            <span class="text-warning fw-bold font-monospace">+{{ attempt.points_earned }} points</span>.
+        </p>
+
+        <!-- Key Metrics Cards Row -->
+        <div class="row g-3 justify-content-center mt-4">
+            <div class="col-6 col-md-2">
+                <div class="p-3 rounded-4 bg-dark border border-secondary-subtle">
+                    <div class="text-success fw-bold font-monospace fs-4">{{ attempt.correct_answers }}</div>
+                    <div class="text-muted small">Correct</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="p-3 rounded-4 bg-dark border border-secondary-subtle">
+                    <div class="text-danger fw-bold font-monospace fs-4">{{ attempt.wrong_answers }}</div>
+                    <div class="text-muted small">Wrong</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="p-3 rounded-4 bg-dark border border-secondary-subtle">
+                    <div class="text-secondary fw-bold font-monospace fs-4">{{ attempt.skipped_answers }}</div>
+                    <div class="text-muted small">Skipped</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="p-3 rounded-4 bg-dark border border-secondary-subtle">
+                    <div class="text-info fw-bold font-monospace fs-4">{{ attempt.time_taken_sec }}s</div>
+                    <div class="text-muted small">Time Taken</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="p-3 rounded-4 bg-dark border border-secondary-subtle">
+                    <div class="text-warning fw-bold font-monospace fs-4">+{{ attempt.points_earned }}</div>
+                    <div class="text-muted small">Points Earned</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="p-3 rounded-4 bg-dark border border-secondary-subtle">
+                    <div class="text-primary fw-bold font-monospace fs-4">#{{ user_rank }}</div>
+                    <div class="text-muted small">Current Rank</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Action Buttons -->
+        <div class="d-flex flex-wrap gap-2 justify-content-center mt-4 pt-2">
+            <a href="{{ url_for('quiz_setup', topic_slug=attempt.topic_slug) }}" class="btn btn-primary rounded-pill px-4 fw-semibold">
+                <i class="fa-solid fa-rotate-right me-1"></i> Retake Quiz
+            </a>
+            <a href="{{ url_for('leaderboard', topic=attempt.topic_slug) }}" class="btn btn-outline-warning rounded-pill px-4">
+                <i class="fa-solid fa-trophy me-1"></i> Topic Leaderboard
+            </a>
+            <a href="{{ url_for('progress') }}" class="btn btn-outline-success rounded-pill px-4">
+                <i class="fa-solid fa-chart-line me-1"></i> Track Progress
+            </a>
+            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary rounded-pill px-3">
+                <i class="fa-solid fa-house me-1"></i> All Topics
+            </a>
+        </div>
+    </div>
+
+    <!-- Question by Question Detailed Review -->
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold text-light mb-1">
+                <i class="fa-solid fa-clipboard-check text-info me-2"></i>Detailed Question Review
+            </h3>
+            <p class="text-muted small mb-0">Inspect each question, your selected answer, the correct answer, and in-depth explanations.</p>
+        </div>
+
+        <!-- Review Filters -->
+        <div class="btn-group btn-group-sm" role="group" aria-label="Review filter">
+            <button type="button" class="btn btn-outline-secondary active" onclick="filterReview('all', this)">All ({{ answers|length }})</button>
+            <button type="button" class="btn btn-outline-success" onclick="filterReview('correct', this)">Correct ({{ attempt.correct_answers }})</button>
+            <button type="button" class="btn btn-outline-danger" onclick="filterReview('wrong', this)">Wrong ({{ attempt.wrong_answers }})</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="filterReview('skipped', this)">Skipped ({{ attempt.skipped_answers }})</button>
+        </div>
+    </div>
+
+    <!-- Review Items List -->
+    <div id="review-list">
+        {% for a in answers %}
+        <div class="review-item-card p-4 {% if a.is_correct %}review-type-correct{% elif a.selected_option is none %}review-type-skipped{% else %}review-type-wrong{% endif %}">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-secondary-subtle text-secondary font-monospace">Question {{ loop.index }}</span>
+                    {% if a.is_correct %}
+                    <span class="badge review-badge-correct font-monospace"><i class="fa-solid fa-circle-check me-1"></i> Correct</span>
+                    {% elif a.selected_option is none %}
+                    <span class="badge review-badge-skipped font-monospace"><i class="fa-solid fa-clock me-1"></i> Skipped / Expired</span>
+                    {% else %}
+                    <span class="badge review-badge-wrong font-monospace"><i class="fa-solid fa-circle-xmark me-1"></i> Incorrect</span>
+                    {% endif %}
+                </div>
+                <div class="text-muted small font-monospace">
+                    <i class="fa-regular fa-clock me-1"></i>{{ a.time_spent_sec }}s spent
+                </div>
+            </div>
+
+            <!-- Question Text -->
+            <h5 class="text-light fw-bold mb-3">{{ a.question_text }}</h5>
+
+            <!-- Code Snippet if exists -->
+            {% if a.code_snippet and a.code_snippet.strip() != '' %}
+            <div class="code-container my-3">
+                <pre><code class="language-{{ a.code_lang or attempt.topic_slug }}">{{ a.code_snippet }}</code></pre>
+            </div>
+            {% endif %}
+
+            <!-- Options Grid Breakdown -->
+            <div class="row g-2 mt-2">
+                {% set opts = [('A', a.option_a), ('B', a.option_b), ('C', a.option_c), ('D', a.option_d)] %}
+                {% for letter, opt_text in opts %}
+                <div class="col-md-6">
+                    <div class="p-3 rounded-3 border d-flex align-items-center gap-2 small
+                        {% if letter == a.correct_option %}
+                            bg-success-subtle border-success text-success fw-bold
+                        {% elif letter == a.selected_option and not a.is_correct %}
+                            bg-danger-subtle border-danger text-danger fw-bold
+                        {% else %}
+                            bg-dark border-secondary-subtle text-secondary
+                        {% endif %}">
+                        <span class="badge font-monospace {% if letter == a.correct_option %}bg-success text-white{% elif letter == a.selected_option and not a.is_correct %}bg-danger text-white{% else %}bg-secondary text-light{% endif %}">
+                            {{ letter }}
+                        </span>
+                        <span class="flex-grow-1">{{ opt_text }}</span>
+
+                        {% if letter == a.correct_option %}
+                            <span class="badge bg-success text-white"><i class="fa-solid fa-check me-1"></i>Correct Answer</span>
+                        {% elif letter == a.selected_option and not a.is_correct %}
+                            <span class="badge bg-danger text-white"><i class="fa-solid fa-xmark me-1"></i>Your Answer</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Explanation Box -->
+            <div class="mt-4 p-3 rounded-3 bg-dark border border-secondary-subtle small">
+                <div class="d-flex align-items-center gap-2 text-info fw-bold mb-1">
+                    <i class="fa-solid fa-lightbulb text-warning"></i> Technical Explanation:
+                </div>
+                <div class="text-light leading-relaxed">
+                    {{ a.explanation }}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const scorePct = {{ attempt.score_percentage }};
+        if (scorePct >= 80 && window.confetti) {
+            confetti({
+                particleCount: 120,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+    });
+
+    function filterReview(type, btn) {
+        document.querySelectorAll('.btn-group .btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const items = document.querySelectorAll('.review-item-card');
+        items.forEach(item => {
+            if (type === 'all') {
+                item.style.display = 'block';
+            } else if (type === 'correct') {
+                item.style.display = item.classList.contains('review-type-correct') ? 'block' : 'none';
+            } else if (type === 'wrong') {
+                item.style.display = item.classList.contains('review-type-wrong') ? 'block' : 'none';
+            } else if (type === 'skipped') {
+                item.style.display = item.classList.contains('review-type-skipped') ? 'block' : 'none';
+            }
+        });
+    }
+</script>
+{% endblock %}

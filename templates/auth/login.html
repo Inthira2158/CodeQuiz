@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In – CodeQuiz{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="quiz-card p-4 p-md-5 shadow-lg border-secondary-subtle">
+                <div class="text-center mb-4">
+                    <div class="brand-icon-wrapper mx-auto mb-3" style="width: 50px; height: 50px; font-size: 1.5rem;">
+                        <i class="fa-solid fa-terminal text-primary"></i>
+                    </div>
+                    <h3 class="fw-bold text-light mb-1">Welcome to CodeQuiz</h3>
+                    <p class="text-secondary small">Log in to track your scores, rankings, and topic mastery</p>
+                </div>
+
+                <form method="POST" action="{{ url_for('login') }}">
+                    <div class="mb-3">
+                        <label class="form-label text-light small fw-semibold">Username or Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary-subtle text-secondary"><i class="fa-solid fa-user"></i></span>
+                            <input type="text" name="username" class="form-control bg-dark border-secondary-subtle text-light" placeholder="e.g. AlexDev or user@example.com" required autofocus>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-light small fw-semibold">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary-subtle text-secondary"><i class="fa-solid fa-lock"></i></span>
+                            <input type="password" name="password" class="form-control bg-dark border-secondary-subtle text-light" placeholder="••••••••" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold rounded-pill mb-3 shadow-sm">
+                        Sign In <i class="fa-solid fa-arrow-right ms-1"></i>
+                    </button>
+                </form>
+
+                <!-- Quick Demo Login Hint -->
+                <div class="p-2 mb-3 rounded-3 bg-dark border border-secondary-subtle small text-center text-muted">
+                    <span>Demo Account: <strong>AlexDev</strong> / Password: <strong>password123</strong></span>
+                </div>
+
+                <div class="text-center mt-3 pt-3 border-top border-secondary-subtle">
+                    <p class="small text-secondary mb-0">
+                        Don't have an account? 
+                        <a href="{{ url_for('register') }}" class="text-primary fw-bold text-decoration-none">Sign Up Free</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

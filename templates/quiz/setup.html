@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Setup {{ topic.name }} Quiz – CodeQuiz{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Breadcrumbs -->
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb small">
+                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}" class="text-secondary text-decoration-none">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}#topics-grid" class="text-secondary text-decoration-none">Topics</a></li>
+                    <li class="breadcrumb-item active text-light" aria-current="page">{{ topic.name }}</li>
+                </ol>
+            </nav>
+
+            <!-- Topic Banner Header -->
+            <div class="quiz-card p-4 mb-4 border-0 position-relative overflow-hidden" style="background: linear-gradient(135deg, rgba(22, 27, 34, 0.95), rgba(13, 17, 23, 0.95)); border-left: 5px solid {{ topic.color }} !important;">
+                <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="topic-icon-box" style="background: {{ topic.gradient }};">
+                            <i class="{{ topic.icon }} text-white"></i>
+                        </div>
+                        <div>
+                            <h2 class="fw-bold text-light mb-1">{{ topic.name }} Quiz</h2>
+                            <p class="text-secondary small mb-0">{{ topic.description }}</p>
+                        </div>
+                    </div>
+                    <div class="text-md-end">
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace px-3 py-2">
+                            <i class="fa-solid fa-layer-group me-1"></i> {{ topic.question_count }} Questions in Bank
+                        </span>
+                    </div>
+                </div>
+
+                {% if user_stats %}
+                <div class="mt-3 pt-3 border-top border-secondary-subtle row g-2">
+                    <div class="col-4">
+                        <span class="text-muted small">Quizzes Taken:</span>
+                        <span class="text-light fw-bold font-monospace ms-1">{{ user_stats.quizzes_taken }}</span>
+                    </div>
+                    <div class="col-4">
+                        <span class="text-muted small">Personal Best:</span>
+                        <span class="text-success fw-bold font-monospace ms-1">{{ user_stats.best_score }}%</span>
+                    </div>
+                    <div class="col-4">
+                        <span class="text-muted small">Current Mastery:</span>
+                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle font-monospace ms-1">{{ user_stats.mastery_level }}</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Quiz Setup Form -->
+            <div class="quiz-card p-4 shadow-sm">
+                <h4 class="fw-bold text-light mb-4">
+                    <i class="fa-solid fa-sliders text-primary me-2"></i>Configure Your Quiz Session
+                </h4>
+
+                <form action="{{ url_for('quiz_play', topic_slug=topic.slug) }}" method="GET">
+                    <!-- Difficulty Selection -->
+                    <div class="mb-4">
+                        <label class="form-label text-light fw-semibold d-flex align-items-center justify-content-between">
+                            <span>Select Difficulty</span>
+                            <span class="text-muted small font-monospace">Adapts question complexity</span>
+                        </label>
+                        <div class="row g-2">
+                            <div class="col-6 col-md-3">
+                                <input type="radio" class="btn-check" name="difficulty" id="diff-mixed" value="Mixed" checked>
+                                <label class="btn btn-outline-secondary w-100 py-3 text-start" for="diff-mixed">
+                                    <div class="fw-bold text-light"><i class="fa-solid fa-shuffle text-primary me-1"></i> Mixed</div>
+                                    <div class="text-muted small" style="font-size: 0.75rem;">All Levels</div>
+                                </label>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <input type="radio" class="btn-check" name="difficulty" id="diff-beginner" value="Beginner">
+                                <label class="btn btn-outline-secondary w-100 py-3 text-start" for="diff-beginner">
+                                    <div class="fw-bold text-success"><i class="fa-solid fa-seedling me-1"></i> Beginner</div>
+                                    <div class="text-muted small" style="font-size: 0.75rem;">Core Syntax</div>
+                                </label>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <input type="radio" class="btn-check" name="difficulty" id="diff-intermediate" value="Intermediate">
+                                <label class="btn btn-outline-secondary w-100 py-3 text-start" for="diff-intermediate">
+                                    <div class="fw-bold text-warning"><i class="fa-solid fa-code-branch me-1"></i> Intermediate</div>
+                                    <div class="text-muted small" style="font-size: 0.75rem;">Logic & Functions</div>
+                                </label>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <input type="radio" class="btn-check" name="difficulty" id="diff-advanced" value="Advanced">
+                                <label class="btn btn-outline-secondary w-100 py-3 text-start" for="diff-advanced">
+                                    <div class="fw-bold text-danger"><i class="fa-solid fa-fire me-1"></i> Advanced</div>
+                                    <div class="text-muted small" style="font-size: 0.75rem;">Deep Mechanics</div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Question Count -->
+                    <div class="mb-4">
+                        <label class="form-label text-light fw-semibold d-flex align-items-center justify-content-between">
+                            <span>Number of Questions</span>
+                            <span class="text-muted small font-monospace">Quick sprint or comprehensive exam</span>
+                        </label>
+                        <div class="row g-2">
+                            <div class="col-4">
+                                <input type="radio" class="btn-check" name="count" id="count-5" value="5">
+                                <label class="btn btn-outline-secondary w-100 py-2 text-center" for="count-5">
+                                    <div class="fw-bold font-monospace">5 Questions</div>
+                                    <div class="text-muted small" style="font-size: 0.75rem;">~2.5 mins</div>
+                                </label>
+                            </div>
+                            <div class="col-4">
+                                <input type="radio" class="btn-check" name="count" id="count-10" value="10" checked>
+                                <label class="btn btn-outline-secondary w-100 py-2 text-center" for="count-10">
+                                    <div class="fw-bold font-monospace text-primary">10 Questions</div>
+                                    <div class="text-muted small" style="font-size: 0.75rem;">Standard (~5 mins)</div>
+                                </label>
+                            </div>
+                            <div class="col-4">
+                                <input type="radio" class="btn-check" name="count" id="count-15" value="15">
+                                <label class="btn btn-outline-secondary w-100 py-2 text-center" for="count-15">
+                                    <div class="fw-bold font-monospace">15 Questions</div>
+                                    <div class="text-muted small" style="font-size: 0.75rem;">Full Exam (~7.5 mins)</div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timer Mode -->
+                    <div class="mb-4">
+                        <label class="form-label text-light fw-semibold d-flex align-items-center justify-content-between">
+                            <span>Timer & Scoring Mode</span>
+                            <span class="text-muted small font-monospace">Automatic submission on expiry</span>
+                        </label>
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <input type="radio" class="btn-check" name="timer_mode" id="timer-per-q" value="per_question" checked>
+                                <label class="btn btn-outline-secondary w-100 py-3 text-start" for="timer-per-q">
+                                    <div class="fw-bold text-light"><i class="fa-solid fa-hourglass-half text-info me-1"></i> Per-Question</div>
+                                    <div class="text-muted small" style="font-size: 0.75rem;">30s per question with urgency ticks</div>
+                                </label>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="radio" class="btn-check" name="timer_mode" id="timer-total" value="total">
+                                <label class="btn btn-outline-secondary w-100 py-3 text-start" for="timer-total">
+                                    <div class="fw-bold text-light"><i class="fa-solid fa-clock text-warning me-1"></i> Total Timer</div>
+                                    <div class="text-muted small" style="font-size: 0.75rem;">Total session countdown timer</div>
+                                </label>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="radio" class="btn-check" name="timer_mode" id="timer-practice" value="practice">
+                                <label class="btn btn-outline-secondary w-100 py-3 text-start" for="timer-practice">
+                                    <div class="fw-bold text-light"><i class="fa-solid fa-book-open text-success me-1"></i> Practice Mode</div>
+                                    <div class="text-muted small" style="font-size: 0.75rem;">No timer, self-paced study</div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rules & Scoring Info -->
+                    <div class="alert alert-dark border-secondary-subtle small mb-4">
+                        <div class="fw-bold text-light mb-1"><i class="fa-solid fa-info-circle text-primary me-1"></i> Scoring Rules:</div>
+                        <ul class="mb-0 ps-3 text-secondary">
+                            <li><strong>+20 points</strong> awarded per correct answer.</li>
+                            <li><strong>Speed Bonus:</strong> Earn up to +10 extra points per question for answering swiftly.</li>
+                            <li>Automatic submission when time runs out.</li>
+                            <li>Detailed technical explanations provided immediately after completing the quiz.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Action Button -->
+                    <div class="d-flex align-items-center justify-content-between pt-2">
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary rounded-pill px-4">
+                            <i class="fa-solid fa-arrow-left me-1"></i> Back
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 shadow fw-bold">
+                            Begin Quiz <i class="fa-solid fa-rocket ms-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

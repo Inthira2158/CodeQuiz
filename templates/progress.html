@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+
+{% block title %}My Topic Progress & Analytics – CodeQuiz{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Profile & Header Summary Banner -->
+    <div class="quiz-card p-4 p-md-5 mb-4 position-relative overflow-hidden shadow-lg border-0" style="background: radial-gradient(circle at 85% 15%, #1e293b 0%, #161b22 100%);">
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="avatar-circle avatar-large bg-primary text-white shadow">
+                    {{ current_user.username[:1].upper() }}
+                </div>
+                <div>
+                    <div class="d-flex align-items-center gap-2">
+                        <h2 class="fw-black text-light mb-0">{{ current_user.username }}</h2>
+                        <span class="badge bg-warning text-dark font-monospace fw-bold">
+                            <i class="fa-solid fa-star me-1"></i>{{ current_user.total_points }} pts
+                        </span>
+                    </div>
+                    <p class="text-secondary small mb-0">{{ current_user.bio }}</p>
+                    <div class="text-muted small mt-1 font-monospace">Member since {{ current_user.created_at[:10] }}</div>
+                </div>
+            </div>
+
+            <div class="text-md-end">
+                <div class="d-inline-flex flex-column align-items-md-end">
+                    <span class="text-secondary small text-uppercase font-monospace">Global Standing</span>
+                    <span class="fs-2 fw-black text-warning font-monospace">#{{ user_rank }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metric Counters Row -->
+        <div class="row g-3 mt-4 pt-3 border-top border-secondary-subtle">
+            <div class="col-6 col-md-3">
+                <div class="p-3 rounded-4 bg-dark border border-secondary-subtle">
+                    <div class="text-light fw-bold font-monospace fs-4">{{ summary.total_quizzes }}</div>
+                    <div class="text-muted small">Quizzes Completed</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 rounded-4 bg-dark border border-secondary-subtle">
+                    <div class="text-primary fw-bold font-monospace fs-4">{{ summary.total_questions_answered }}</div>
+                    <div class="text-muted small">Questions Solved</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 rounded-4 bg-dark border border-secondary-subtle">
+                    <div class="text-success fw-bold font-monospace fs-4">{{ summary.overall_avg_score }}%</div>
+                    <div class="text-muted small">Average Accuracy</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 rounded-4 bg-dark border border-secondary-subtle">
+                    <div class="text-info fw-bold font-monospace fs-4">{{ (summary.total_study_time_sec // 60) }}m {{ (summary.total_study_time_sec % 60) }}s</div>
+                    <div class="text-muted small">Total Quiz Time</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skills Radar Chart & Progress Overview Row -->
+    <div class="row g-4 mb-4">
+        <!-- Radar Chart Column -->
+        <div class="col-lg-5">
+            <div class="quiz-card p-4 h-100 shadow-sm d-flex flex-column justify-content-between">
+                <div>
+                    <h5 class="fw-bold text-light mb-1">
+                        <i class="fa-solid fa-chart-pie text-info me-2"></i>Topic Mastery Matrix
+                    </h5>
+                    <p class="text-muted small mb-3">Multi-topic proficiency across languages and web technologies.</p>
+                    
+                    <div style="position: relative; height: 280px; width: 100%;">
+                        <canvas id="topicRadarChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="text-center mt-3 pt-2 border-top border-secondary-subtle">
+                    <span class="text-muted small">Scores updated after every completed assessment</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Topic Cards Column -->
+        <div class="col-lg-7">
+            <div class="quiz-card p-4 h-100 shadow-sm">
+                <h5 class="fw-bold text-light mb-1">
+                    <i class="fa-solid fa-bars-progress text-primary me-2"></i>Progress by Topic
+                </h5>
+                <p class="text-muted small mb-3">Detailed mastery level, personal best, and accuracy per language.</p>
+
+                <div class="d-flex flex-column gap-3">
+                    {% for tp in topic_progress %}
+                    <div class="p-3 rounded-3 bg-dark border border-secondary-subtle">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="avatar-circle avatar-small" style="background: {{ tp.gradient }};">
+                                    <i class="{{ tp.icon }} text-white" style="font-size: 0.9rem;"></i>
+                                </div>
+                                <span class="fw-bold text-light">{{ tp.name }}</span>
+                                <span class="badge font-monospace small
+                                    {% if tp.mastery_level == 'Grandmaster' %}bg-warning text-dark
+                                    {% elif tp.mastery_level == 'Master' %}bg-primary-subtle text-primary border border-primary-subtle
+                                    {% elif tp.mastery_level == 'Skilled' %}bg-success-subtle text-success border border-success-subtle
+                                    {% elif tp.mastery_level == 'Apprentice' %}bg-info-subtle text-info border border-info-subtle
+                                    {% else %}bg-secondary-subtle text-secondary
+                                    {% endif %}">
+                                    {{ tp.mastery_level }}
+                                </span>
+                            </div>
+
+                            <div class="text-end">
+                                <span class="fw-bold text-success font-monospace">{{ tp.best_score }}% Best</span>
+                                <span class="text-muted small ms-1">({{ tp.quizzes_taken }} quizzes)</span>
+                            </div>
+                        </div>
+
+                        <!-- Progress Bar (Based on best score) -->
+                        <div class="mastery-progress mb-2">
+                            <div class="mastery-bar" style="width: {{ tp.best_score }}%; background: {{ tp.gradient }};"></div>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between small text-secondary">
+                            <span>Accuracy: <strong class="text-light font-monospace">{{ tp.accuracy_pct }}%</strong> ({{ tp.total_correct }}/{{ tp.total_questions_attempted }} Qs)</span>
+                            <a href="{{ url_for('quiz_setup', topic_slug=tp.slug) }}" class="btn btn-outline-primary btn-sm rounded-pill py-0 px-2" style="font-size: 0.75rem;">
+                                Practice <i class="fa-solid fa-play ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievements Section -->
+    <div class="quiz-card p-4 mb-4 shadow-sm">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <div>
+                <h5 class="fw-bold text-light mb-1">
+                    <i class="fa-solid fa-medal text-warning me-2"></i>Badges & Achievements
+                </h5>
+                <p class="text-muted small mb-0">Unlock milestones by achieving high scores, speed runs, and topic variety.</p>
+            </div>
+            <span class="badge bg-dark-subtle border border-secondary-subtle text-warning font-monospace px-3 py-1">
+                {{ achievements | selectattr('is_unlocked', 'equalto', 1) | list | length }} / {{ achievements | length }} Unlocked
+            </span>
+        </div>
+
+        <div class="row g-3">
+            {% for ach in achievements %}
+            <div class="col-md-6 col-lg-4">
+                <div class="achievement-card {% if ach.is_unlocked %}unlocked{% else %}locked{% endif %}">
+                    <div class="achievement-icon-wrapper bg-{{ ach.badge_color }}-subtle text-{{ ach.badge_color }}">
+                        <i class="{{ ach.icon }}"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <h6 class="fw-bold text-light mb-0">{{ ach.title }}</h6>
+                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle font-monospace small">+{{ ach.points }} pts</span>
+                        </div>
+                        <p class="text-secondary small mb-1 mt-1">{{ ach.description }}</p>
+                        {% if ach.is_unlocked %}
+                        <span class="text-success small font-monospace"><i class="fa-solid fa-check me-1"></i>Unlocked {{ ach.unlocked_at[:10] }}</span>
+                        {% else %}
+                        <span class="text-muted small font-monospace"><i class="fa-solid fa-lock me-1"></i>Locked</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Recent Quiz Attempts Log -->
+    <div class="quiz-card p-0 overflow-hidden shadow-sm">
+        <div class="p-3 border-bottom border-secondary-subtle d-flex align-items-center justify-content-between">
+            <h5 class="fw-bold text-light mb-0">
+                <i class="fa-solid fa-clock-rotate-left text-info me-2"></i>Recent Quiz Attempts History
+            </h5>
+            <span class="text-muted small font-monospace">Last 10 Quizzes</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0">
+                <thead class="border-bottom border-secondary-subtle">
+                    <tr class="text-muted small font-monospace">
+                        <th class="ps-4">DATE</th>
+                        <th>TOPIC</th>
+                        <th>DIFFICULTY</th>
+                        <th>SCORE</th>
+                        <th>ACCURACY</th>
+                        <th>TIME</th>
+                        <th>POINTS</th>
+                        <th class="text-end pe-4">ACTION</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for h in history %}
+                    <tr>
+                        <td class="ps-4 font-monospace small text-muted">{{ h.completed_at[:16] }}</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="{{ h.topic_icon }}" style="color: {{ h.topic_color }};"></i>
+                                <span class="fw-bold text-light">{{ h.topic_name }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge font-monospace
+                                {% if h.difficulty == 'Beginner' %}bg-success-subtle text-success
+                                {% elif h.difficulty == 'Intermediate' %}bg-warning-subtle text-warning
+                                {% else %}bg-danger-subtle text-danger{% endif %}">
+                                {{ h.difficulty }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="font-monospace text-light">{{ h.correct_answers }}/{{ h.total_questions }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle font-monospace">
+                                {{ h.score_percentage }}%
+                            </span>
+                        </td>
+                        <td class="font-monospace small text-secondary">{{ h.time_taken_sec }}s</td>
+                        <td>
+                            <span class="text-warning font-monospace fw-bold">+{{ h.points_earned }}</span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <a href="{{ url_for('quiz_result', attempt_id=h.id) }}" class="btn btn-outline-info btn-sm rounded-pill px-3">
+                                Review <i class="fa-solid fa-arrow-right ms-1"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-5 text-secondary">
+                            <i class="fa-solid fa-chart-line fs-1 d-block mb-2"></i>
+                            No quiz attempts yet. Start your first quiz above to track your coding progress!
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const labels = {{ radar_labels | safe }};
+        const scores = {{ radar_scores | safe }};
+        const accuracy = {{ radar_accuracy | safe }};
+
+        const ctx = document.getElementById('topicRadarChart');
+        if (ctx && window.Chart) {
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Personal Best (%)',
+                            data: scores,
+                            backgroundColor: 'rgba(88, 166, 255, 0.25)',
+                            borderColor: '#58a6ff',
+                            pointBackgroundColor: '#58a6ff',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#58a6ff',
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Average Accuracy (%)',
+                            data: accuracy,
+                            backgroundColor: 'rgba(63, 185, 80, 0.2)',
+                            borderColor: '#3fb950',
+                            pointBackgroundColor: '#3fb950',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#3fb950',
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            pointLabels: {
+                                color: '#f0f6fc',
+                                font: { family: "'Fira Code', monospace", size: 11, weight: 'bold' }
+                            },
+                            ticks: {
+                                display: false,
+                                min: 0,
+                                max: 100,
+                                stepSize: 20
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#8b949e',
+                                font: { family: "'Inter', sans-serif", size: 11 }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
