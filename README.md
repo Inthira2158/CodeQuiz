@@ -7,6 +7,11 @@
 [![Prism.js](https://img.shields.io/badge/Prism.js-Syntax_Highlighting-2B2B2B?logo=javascript&logoColor=white)](https://prismjs.com/)
 [![Chart.js](https://img.shields.io/badge/Chart.js-4.x-FF6384?logo=chartdotjs&logoColor=white)](https://www.chartjs.org/)
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Inthira2158/CodeQuiz)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Inthira2158/CodeQuiz)
+
+🌐 **Live Demo URL:** [https://b923442741bb11.lhr.life](https://b923442741bb11.lhr.life)
+
 **CodeQuiz** is a full-stack, developer-focused programming quiz and assessment platform. Designed to sharpen engineering problem-solving and technical interview readiness across **Python, Java, SQL, HTML, CSS, and JavaScript**.
 
 ---
